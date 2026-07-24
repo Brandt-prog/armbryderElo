@@ -1,0 +1,1 @@
+export type MatchStatus = 'pending_confirmation' | 'confirmed' | 'cancelled'
