@@ -69,7 +69,14 @@ export const UserRepository = {
     return toDomain(data as UserRow)
   },
 
-  async create(user: Omit<User, 'id' | 'createdDate'>): Promise<User> {
+  /**
+   * Creates a new user. If `id` is provided (e.g. to match a Supabase Auth
+   * user's id when completing a profile after magic link login), it will be
+   * used; otherwise the database generates one automatically.
+   */
+  async create(
+    user: Omit<User, 'id' | 'createdDate'> & { id?: string }
+  ): Promise<User> {
     const { data, error } = await supabase
       .from(TABLE)
       .insert(toRow(user))
