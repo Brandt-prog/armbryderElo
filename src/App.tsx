@@ -2,6 +2,7 @@ import { AuthGate } from './views/AuthGate'
 import { AdminApprovalView } from './views/AdminApprovalView'
 import { ReportMatchView } from './views/ReportMatchView'
 import { PendingMatchesView } from './views/PendingMatchesView'
+import { LeaderboardView } from './views/LeaderboardView'
 import { useMatches } from './viewmodels/useMatches'
 import './App.css'
 
@@ -10,6 +11,8 @@ function MemberDashboard({ currentUserId }: { currentUserId: string }) {
 
   return (
     <div style={{ marginTop: '2rem' }}>
+      <LeaderboardView />
+      <hr />
       <PendingMatchesView
         pendingMatches={pendingMatches}
         activeMembers={activeMembers}
