@@ -4,11 +4,10 @@ import type { UserStatus } from './UserStatus'
 export interface User {
   id: string
   name: string
-  email: string
+  username: string        // this is a login handle, not a real email
   roles: Role[]
   status: UserStatus
 
-  // Only relevant for members (roles includes 'member')
   rating: number | null
   weight: number | null
   height: number | null

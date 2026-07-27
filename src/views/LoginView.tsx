@@ -1,50 +1,77 @@
 import { useState } from 'react'
 
 interface LoginViewProps {
-  onSendMagicLink: (email: string) => Promise<void>
+  onSignUp: (username: string, password: string) => Promise<void>
+  onSignIn: (username: string, password: string) => Promise<void>
   error: string | null
 }
 
-export function LoginView({ onSendMagicLink, error }: LoginViewProps) {
-  const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
-  const [sending, setSending] = useState(false)
+export function LoginView({ onSignUp, onSignIn, error }: LoginViewProps) {
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSending(true)
+    setSubmitting(true)
     try {
-      await onSendMagicLink(email)
-      setSent(true)
+      if (mode === 'signup') {
+        await onSignUp(username, password)
+      } else {
+        await onSignIn(username, password)
+      }
+    } catch {
+      // error is captured via the `error` prop
     } finally {
-      setSending(false)
+      setSubmitting(false)
     }
-  }
-
-  if (sent) {
-    return (
-      <div>
-        <h2>Tjek din email</h2>
-        <p>Vi har sendt et login-link til {email}. Klik på det for at logge ind.</p>
-      </div>
-    )
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Log ind</h2>
+      <h2>{mode === 'signin' ? 'Log ind' : 'Opret konto'}</h2>
       <label>
-        Email
+        Brugernavn
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
+          minLength={3}
         />
       </label>
-      <button type="submit" disabled={sending}>
-        {sending ? 'Sender...' : 'Send login-link'}
+      <label>
+        Kodeord
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={6}
+        />
+      </label>
+      <button type="submit" disabled={submitting}>
+        {submitting ? 'Vent...' : mode === 'signin' ? 'Log ind' : 'Opret konto'}
       </button>
+
+      <p>
+        {mode === 'signin' ? (
+          <>
+            Ny her?{' '}
+            <button type="button" onClick={() => setMode('signup')}>
+              Opret konto
+            </button>
+          </>
+        ) : (
+          <>
+            Har allerede en konto?{' '}
+            <button type="button" onClick={() => setMode('signin')}>
+              Log ind
+            </button>
+          </>
+        )}
+      </p>
+
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </form>
   )

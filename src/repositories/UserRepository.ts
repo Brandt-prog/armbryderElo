@@ -5,11 +5,10 @@ import type { UserStatus } from '../models/UserStatus'
 
 const TABLE = 'users'
 
-// Shape of a row as it exists in the database (snake_case)
 interface UserRow {
   id: string
   name: string
-  email: string
+  username: string
   roles: Role[]
   status: UserStatus
   rating: number | null
@@ -23,7 +22,7 @@ function toDomain(row: UserRow): User {
   return {
     id: row.id,
     name: row.name,
-    email: row.email,
+    username: row.username,
     roles: row.roles,
     status: row.status,
     rating: row.rating,
@@ -38,7 +37,7 @@ function toRow(user: Partial<User>): Partial<UserRow> {
   const row: Partial<UserRow> = {}
   if (user.id !== undefined) row.id = user.id
   if (user.name !== undefined) row.name = user.name
-  if (user.email !== undefined) row.email = user.email
+  if (user.username !== undefined) row.username = user.username
   if (user.roles !== undefined) row.roles = user.roles
   if (user.status !== undefined) row.status = user.status
   if (user.rating !== undefined) row.rating = user.rating
@@ -69,11 +68,6 @@ export const UserRepository = {
     return toDomain(data as UserRow)
   },
 
-  /**
-   * Creates a new user. If `id` is provided (e.g. to match a Supabase Auth
-   * user's id when completing a profile after magic link login), it will be
-   * used; otherwise the database generates one automatically.
-   */
   async create(
     user: Omit<User, 'id' | 'createdDate'> & { id?: string }
   ): Promise<User> {

@@ -47,10 +47,20 @@ export function useAuth() {
     return unsubscribe
   }, [loadUserForSession])
 
-  const sendMagicLink = useCallback(async (email: string) => {
+  const signUp = useCallback(async (username: string, password: string) => {
     setError(null)
     try {
-      await AuthService.sendMagicLink(email)
+      await AuthService.signUp(username, password)
+    } catch (err) {
+      setError((err as Error).message)
+      throw err
+    }
+  }, [])
+
+  const signIn = useCallback(async (username: string, password: string) => {
+    setError(null)
+    try {
+      await AuthService.signIn(username, password)
     } catch (err) {
       setError((err as Error).message)
       throw err
@@ -59,20 +69,21 @@ export function useAuth() {
 
   const completeProfile = useCallback(
     async (profile: { name: string; weight: number | null; height: number | null }) => {
-      if (!session?.user) throw new Error('No active session.')
+      if (!session?.user?.email) throw new Error('No active session.')
       setError(null)
       try {
+        const username = session.user.email.split('@')[0]
         const newUser = await UserRepository.create({
-          id: session.user.id, // link to the Supabase Auth user
+          id: session.user.id,
           name: profile.name,
-          email: session.user.email ?? '',
+          username,
           roles: ['member'],
           status: 'pending_approval',
           rating: 1200,
           weight: profile.weight,
           height: profile.height,
           consentDate: new Date().toISOString(),
-        } as Omit<User, 'createdDate'>)
+        })
         setCurrentUser(newUser)
         setStatus('signed_in')
       } catch (err) {
@@ -90,5 +101,5 @@ export function useAuth() {
     setStatus('signed_out')
   }, [])
 
-  return { status, session, currentUser, error, sendMagicLink, completeProfile, signOut }
+  return { status, session, currentUser, error, signUp, signIn, completeProfile, signOut }
 }

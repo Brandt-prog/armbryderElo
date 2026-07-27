@@ -1,17 +1,25 @@
 import { supabase } from '../lib/supabaseClient'
-import type { Session, User as SupabaseAuthUser } from '@supabase/supabase-js'
+import type { Session } from '@supabase/supabase-js'
+
+const FAKE_EMAIL_DOMAIN = 'armklub.local'
+
+function toFakeEmail(username: string): string {
+  return `${username.toLowerCase().trim()}@${FAKE_EMAIL_DOMAIN}`
+}
 
 export const AuthService = {
-  /**
-   * Sends a magic link to the given email. The user clicks the link
-   * in their inbox to complete sign-in — no password involved.
-   */
-  async sendMagicLink(email: string): Promise<void> {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
+  async signUp(username: string, password: string): Promise<void> {
+    const { error } = await supabase.auth.signUp({
+      email: toFakeEmail(username),
+      password,
+    })
+    if (error) throw error
+  },
+
+  async signIn(username: string, password: string): Promise<void> {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: toFakeEmail(username),
+      password,
     })
     if (error) throw error
   },
@@ -27,14 +35,6 @@ export const AuthService = {
     return data.session
   },
 
-  getCurrentAuthUser(session: Session | null): SupabaseAuthUser | null {
-    return session?.user ?? null
-  },
-
-  /**
-   * Subscribes to auth state changes (login, logout, token refresh).
-   * Returns an unsubscribe function.
-   */
   onAuthStateChange(callback: (session: Session | null) => void): () => void {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       callback(session)
