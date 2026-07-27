@@ -2,7 +2,6 @@ import { UserRepository } from '../repositories/UserRepository'
 import { MatchRepository } from '../repositories/MatchRepository'
 import { calculateNewRatings, STARTING_RATING } from './EloService'
 import type { Match } from '../models/Match'
-import type { User } from '../models/User'
 
 /**
  * MatchService — orchestrates the report/confirm handshake flow for matches,
